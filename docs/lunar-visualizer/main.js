@@ -5,6 +5,7 @@
 import { drawOrbital } from './orbital-view.js';
 import { drawHorizon } from './horizon-view.js';
 import {
+  LUNAR_CYCLE_DAYS,
   illuminationFraction,
   moonPhaseAngle,
   phaseName,
@@ -43,8 +44,16 @@ function syncTimeUI() {
 }
 
 ui.lunarSlider.addEventListener('input', (e) => {
-  state.lunarDay = parseFloat(e.target.value);
+  const next = parseFloat(e.target.value);
+  // Compensate time-of-day so the Moon stays at the same altitude:
+  // moonAltitude = sunAltitude(timeOfDay - 24 * lunarDay / 29.5),
+  // so holding (timeOfDay - 24 * lunarDay / 29.5) constant pins altitude.
+  const dt = (next - state.lunarDay) * 24 / LUNAR_CYCLE_DAYS;
+  state.lunarDay = next;
+  state.timeOfDay = ((state.timeOfDay + dt) % 24 + 24) % 24;
+  ui.timeSlider.value = state.timeOfDay;
   syncLunarUI();
+  syncTimeUI();
   render();
 });
 
