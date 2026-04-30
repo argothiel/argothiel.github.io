@@ -31,9 +31,9 @@ const COLOR = {
 
 // Layout fractions (multiplied by canvas width unless noted).
 const LAYOUT = {
-  sunMarginPx:   36,    // distance of Sun centre from right edge, in px
-  sunRadius:     0.06,
-  sunGlow:       2.5,   // glow radius / sun radius
+  sunOffsetRight: 2.45, // Sun centre this fraction of canvas width past the right edge
+  sunRadius:      2.50,
+  sunGlow:        1.25,  // glow radius / sun radius
   earthRadius:   0.055,
   moonOrbit:     0.26,
   moonSize:      0.42,  // moon radius / earth radius
@@ -58,7 +58,7 @@ export function drawOrbital(ctx, state) {
   ctx.fillRect(0, 0, W, H);
   drawStars(ctx, W, H, { count: LAYOUT.starCount });
 
-  const sunX = W - LAYOUT.sunMarginPx;
+  const sunX = W + W * LAYOUT.sunOffsetRight;
   const sunY = cy;
   const sunR = W * LAYOUT.sunRadius;
   const earthR = W * LAYOUT.earthRadius;
@@ -205,7 +205,11 @@ function drawLabels(ctx, W, p) {
   ctx.font = `${W * LAYOUT.labelFont}px 'Syne Mono', monospace`;
   ctx.textAlign = 'center';
 
-  drawLabel(ctx, 'SUN',   p.sunX, p.sunY + p.sunR + W * LAYOUT.labelOffsetSE, COLOR.labelSun);
+  // Sun centre is off-canvas; label sits just inside the visible left edge of the Sun.
+  const sunVisibleEdgeX = p.sunX - p.sunR;
+  ctx.textAlign = 'right';
+  drawLabel(ctx, 'SUN', sunVisibleEdgeX - W * 0.012, p.sunY, COLOR.labelSun);
+  ctx.textAlign = 'center';
   drawLabel(ctx, 'EARTH', p.cx,   p.cy   + p.earthR + W * LAYOUT.labelOffsetEx, COLOR.labelEarth);
 
   const dx = p.mX - p.cx;
