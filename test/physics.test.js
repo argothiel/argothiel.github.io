@@ -8,7 +8,7 @@ import {
   moonPhaseAngle,
   phaseName,
   sunAltitude,
-} from '../docs/lunar-visualizer/physics.js';
+} from '../docs/moon/physics.js';
 
 const TWO_PI = 2 * Math.PI;
 const close = (a, b, tol = 1e-12) => Math.abs(a - b) <= tol;
