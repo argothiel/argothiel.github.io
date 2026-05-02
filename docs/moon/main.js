@@ -109,7 +109,10 @@ window.addEventListener('resize', () => {
 
 // Drag the Moon or the observer directly on the orbital canvas. Hit-test in
 // canvas-internal pixels (CSS pixels are scaled to that via getBoundingClientRect).
-const HIT_SLACK_PX = 8;
+// Touch fingers need a larger hit target than a mouse cursor.
+const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches;
+const HIT_SLACK_PX  = coarsePointer ? 22 : 8;
+const OBS_HIT_PX    = coarsePointer ? 22 : 16;
 let drag = null;
 
 function canvasPoint(e) {
@@ -124,11 +127,11 @@ function pickTarget(p) {
   const dm = Math.hypot(p.x - g.mX, p.y - g.mY);
   const dObs = Math.hypot(p.x - g.oX, p.y - g.oY);
   const moonHit = dm <= g.moonR + HIT_SLACK_PX;
-  const obsHit  = dObs <= HIT_SLACK_PX * 2;
+  const obsHit  = dObs <= OBS_HIT_PX;
   // If both regions overlap (small canvas), prefer whichever is closer in
   // proportion to its hit radius.
   if (moonHit && obsHit) {
-    return (dm / (g.moonR + HIT_SLACK_PX)) < (dObs / (HIT_SLACK_PX * 2)) ? 'moon' : 'observer';
+    return (dm / (g.moonR + HIT_SLACK_PX)) < (dObs / OBS_HIT_PX) ? 'moon' : 'observer';
   }
   if (moonHit) return 'moon';
   if (obsHit)  return 'observer';

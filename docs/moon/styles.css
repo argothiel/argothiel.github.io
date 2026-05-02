@@ -114,6 +114,7 @@ canvas {
 #orbitalCanvas {
   max-width: 480px;
   margin: 0 auto;
+  touch-action: none;
 }
 
 /* Horizon panel spans full width */
