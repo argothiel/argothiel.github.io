@@ -21,10 +21,14 @@
   <!-- Top-down orbital view, with a thin observer's-horizon strip on the right -->
   <div class="panel orbital-panel">
     <div class="orbital-row">
-      <canvas id="orbitalCanvas"
-              aria-label="Top-down diagram of the Sun, Earth, and Moon, showing the Moon's current orbital position and the observer on Earth's surface."></canvas>
-      <canvas id="horizonCanvas"
-              aria-label="Observer's horizon strip showing the Moon at its current altitude with the corresponding lunar phase."></canvas>
+      <div class="canvas-cell">
+        <canvas id="orbitalCanvas"
+                aria-label="Top-down diagram of the Sun, Earth, and Moon, showing the Moon's current orbital position and the observer on Earth's surface."></canvas>
+      </div>
+      <div class="canvas-cell">
+        <canvas id="horizonCanvas"
+                aria-label="Observer's horizon strip showing the Moon at its current altitude with the corresponding lunar phase."></canvas>
+      </div>
     </div>
   </div>
 
