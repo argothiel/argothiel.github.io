@@ -6,7 +6,6 @@ import {
   illuminationFraction,
   moonAltitude,
   moonPhaseAngle,
-  phaseName,
   sunAltitude,
 } from './physics.js';
 import { GOLD_RGB, LEFT_HALF, RIGHT_HALF, drawStars, lerpRGB } from './render-utils.js';
@@ -22,15 +21,13 @@ const SKY = {
 const LAYOUT = {
   horizonFraction:   0.85,  // share of canvas height that is sky
   altitudeScale:     0.85,  // how high alt=+1 reaches in the sky region
-  moonRadius:        0.13,  // of canvas height
+  moonRadius:        0.40,  // of min(W, H) — scales for narrow strip
   moonGlowInner:     0.8,   // multipliers on moon radius
   moonGlowOuter:     2.2,
   starCount:         50,
   starSeedOffset:    100,   // decorrelate from orbital starfield
   starBigSize:       1.2,
   starSmallSize:     0.6,
-  phaseLabelFont:    0.075,
-  phaseLabelY:       0.96,
 };
 
 const COLOR = {
@@ -39,7 +36,6 @@ const COLOR = {
   moonLit:      '#e8ecf4',
   moonDark:     '#252835',
   moonRim:      'rgba(150,160,200,0.3)',
-  phaseLabel:   `rgba(${GOLD_RGB},0.85)`,
 };
 
 export function drawHorizon(ctx, state) {
@@ -57,7 +53,7 @@ export function drawHorizon(ctx, state) {
   drawGround(ctx, W, H, horizonY);
   drawHorizonLine(ctx, W, horizonY);
 
-  const moonR = H * LAYOUT.moonRadius;
+  const moonR = Math.min(W, H) * LAYOUT.moonRadius;
   const moonX = W * 0.5;
   const moonY = altitudeToY(moonAlt, horizonY, skyHeight);
   const illum = illuminationFraction(state);
@@ -65,7 +61,6 @@ export function drawHorizon(ctx, state) {
 
   if (moonAlt > 0 && illum > 0.1) drawMoonGlow(ctx, moonX, moonY, moonR, illum);
   drawMoonPhase(ctx, moonX, moonY, moonR, illum, waxing);
-  drawPhaseLabel(ctx, W, H, state);
 }
 
 // altitude +1 → high in sky, 0 → on horizon, −1 → fully below ground.
@@ -136,13 +131,6 @@ function drawMoonGlow(ctx, x, y, r, illum) {
   ctx.beginPath();
   ctx.arc(x, y, outer, 0, Math.PI * 2);
   ctx.fill();
-}
-
-function drawPhaseLabel(ctx, W, H, state) {
-  ctx.font = `${H * LAYOUT.phaseLabelFont}px 'Syne', sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.fillStyle = COLOR.phaseLabel;
-  ctx.fillText(phaseName(state), W / 2, H * LAYOUT.phaseLabelY);
 }
 
 // ── Mini Moon disc with the current phase ──────────────────────────────────

@@ -27,8 +27,6 @@ const COLOR = {
   labelSun:     `rgba(${GOLD_RGB},0.7)`,
   labelEarth:   'rgba(80,160,255,0.7)',
   labelMoon:    'rgba(200,205,216,0.7)',
-  hudCaption:   'rgba(120,140,180,0.7)',
-  hudValue:     `rgb(${GOLD_RGB})`,
 };
 
 // Layout fractions (multiplied by canvas width unless noted).
@@ -48,10 +46,6 @@ const LAYOUT = {
   labelMoonGap:  0.04,
   labelDescent:  0.015,
   phaseArcRel:   0.18,  // phase arc radius / moon orbit radius
-  hudFont:       0.026,
-  hudCaptionFont:0.018,
-  hudPad:        0.025,  // distance from canvas edge
-  hudGap:        0.008,  // gap between caption and value
 };
 
 // Geometry derived from canvas size and state — exported so the input layer
@@ -99,42 +93,6 @@ export function drawOrbital(ctx, state) {
   drawMoon(ctx, mX, mY, moonR);
   drawLabels(ctx, W, { cx, cy, sunX, sunY, sunR, mX, mY, earthR, moonR });
   drawPhaseArc(ctx, cx, cy, moonOrbitR * LAYOUT.phaseArcRel, moonPhaseAngle(state));
-  drawHUD(ctx, W, H, state);
-}
-
-function drawHUD(ctx, W, H, state) {
-  const pad = W * LAYOUT.hudPad;
-  const gap = W * LAYOUT.hudGap;
-  const captionSize = W * LAYOUT.hudCaptionFont;
-  const valueSize   = W * LAYOUT.hudFont;
-
-  ctx.textBaseline = 'top';
-
-  ctx.textAlign = 'left';
-  drawHudCell(ctx, 'LUNAR DAY', `${state.lunarDay.toFixed(1)}`,
-              pad, pad, captionSize, valueSize, gap);
-
-  ctx.textAlign = 'right';
-  drawHudCell(ctx, 'TIME (UTC)', formatHHMM(state.timeOfDay),
-              W - pad, pad, captionSize, valueSize, gap);
-
-  ctx.textBaseline = 'alphabetic';
-}
-
-function drawHudCell(ctx, caption, value, x, y, captionSize, valueSize, gap) {
-  ctx.font = `${captionSize}px 'Syne Mono', monospace`;
-  ctx.fillStyle = COLOR.hudCaption;
-  ctx.fillText(caption, x, y);
-
-  ctx.font = `700 ${valueSize}px 'Syne Mono', monospace`;
-  ctx.fillStyle = COLOR.hudValue;
-  ctx.fillText(value, x, y + captionSize + gap);
-}
-
-function formatHHMM(hours) {
-  const h = Math.floor(hours);
-  const m = Math.floor((hours - h) * 60);
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
 function drawOrbit(ctx, cx, cy, r) {
