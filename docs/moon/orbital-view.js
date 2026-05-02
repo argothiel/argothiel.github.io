@@ -48,27 +48,41 @@ const LAYOUT = {
   phaseArcRel:   0.18,  // phase arc radius / moon orbit radius
 };
 
+// Geometry derived from canvas size and state — exported so the input layer
+// can hit-test the draggable Moon and observer without duplicating layout math.
+export function orbitalGeometry(canvas, state) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const cx = W / 2;
+  const cy = H / 2;
+  const earthR = W * LAYOUT.earthRadius;
+  const moonOrbitR = W * LAYOUT.moonOrbit;
+  const moonR = earthR * LAYOUT.moonSize;
+  const sunX = W + W * LAYOUT.sunOffsetRight;
+  const sunY = cy;
+  const sunR = W * LAYOUT.sunRadius;
+
+  // Canvas y grows downward, so the conventional CCW angle uses (cos, -sin).
+  const moonAngle = moonPhaseAngle(state);
+  const mX = cx + Math.cos(moonAngle) * moonOrbitR;
+  const mY = cy - Math.sin(moonAngle) * moonOrbitR;
+
+  const obsAngle = ((state.timeOfDay - 12) / 24) * Math.PI * 2;
+  const oX = cx + Math.cos(obsAngle) * earthR;
+  const oY = cy - Math.sin(obsAngle) * earthR;
+
+  return { W, H, cx, cy, earthR, moonOrbitR, moonR, sunX, sunY, sunR, mX, mY, oX, oY };
+}
+
 export function drawOrbital(ctx, state) {
   const W = ctx.canvas.width;
   const H = ctx.canvas.height;
-  const cx = W / 2;
-  const cy = H / 2;
+  const g = orbitalGeometry(ctx.canvas, state);
+  const { cx, cy, earthR, moonOrbitR, moonR, sunX, sunY, sunR, mX, mY } = g;
 
   ctx.fillStyle = COLOR.bg;
   ctx.fillRect(0, 0, W, H);
   drawStars(ctx, W, H, { count: LAYOUT.starCount });
-
-  const sunX = W + W * LAYOUT.sunOffsetRight;
-  const sunY = cy;
-  const sunR = W * LAYOUT.sunRadius;
-  const earthR = W * LAYOUT.earthRadius;
-  const moonOrbitR = W * LAYOUT.moonOrbit;
-  const moonR = earthR * LAYOUT.moonSize;
-
-  // Canvas y grows downward, so the conventional CCW angle uses (cos, -sin).
-  const angle = moonPhaseAngle(state);
-  const mX = cx + Math.cos(angle) * moonOrbitR;
-  const mY = cy - Math.sin(angle) * moonOrbitR;
 
   drawOrbit(ctx, cx, cy, moonOrbitR);
   drawDirectionLine(ctx, cx, cy, sunX, sunY, COLOR.sunRay);
@@ -78,7 +92,7 @@ export function drawOrbital(ctx, state) {
   drawObserver(ctx, cx, cy, earthR, state);
   drawMoon(ctx, mX, mY, moonR);
   drawLabels(ctx, W, { cx, cy, sunX, sunY, sunR, mX, mY, earthR, moonR });
-  drawPhaseArc(ctx, cx, cy, moonOrbitR * LAYOUT.phaseArcRel, angle);
+  drawPhaseArc(ctx, cx, cy, moonOrbitR * LAYOUT.phaseArcRel, moonPhaseAngle(state));
 }
 
 function drawOrbit(ctx, cx, cy, r) {

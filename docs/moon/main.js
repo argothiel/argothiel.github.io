@@ -2,7 +2,7 @@
 // the render pipeline. The two views (orbital, horizon) are pure functions
 // of (ctx, state); physics functions are pure functions of state.
 
-import { drawOrbital } from './orbital-view.js';
+import { drawOrbital, orbitalGeometry } from './orbital-view.js';
 import { drawHorizon } from './horizon-view.js';
 import {
   LUNAR_CYCLE_DAYS,
@@ -43,25 +43,29 @@ function syncTimeUI() {
   ui.timeSlider.setAttribute('aria-valuetext', text);
 }
 
-ui.lunarSlider.addEventListener('input', (e) => {
-  const next = parseFloat(e.target.value);
-  // Compensate time-of-day so the Moon stays at the same altitude:
-  // moonAltitude = sunAltitude(timeOfDay - 24 * lunarDay / 29.5),
-  // so holding (timeOfDay - 24 * lunarDay / 29.5) constant pins altitude.
+// Compensate time-of-day so the Moon stays at the same altitude:
+// moonAltitude = sunAltitude(timeOfDay - 24 * lunarDay / 29.5),
+// so holding (timeOfDay - 24 * lunarDay / 29.5) constant pins altitude.
+function setLunarDay(next) {
   const dt = (next - state.lunarDay) * 24 / LUNAR_CYCLE_DAYS;
   state.lunarDay = next;
   state.timeOfDay = ((state.timeOfDay + dt) % 24 + 24) % 24;
+  ui.lunarSlider.value = state.lunarDay;
   ui.timeSlider.value = state.timeOfDay;
   syncLunarUI();
   syncTimeUI();
   render();
-});
+}
 
-ui.timeSlider.addEventListener('input', (e) => {
-  state.timeOfDay = parseFloat(e.target.value);
+function setTimeOfDay(next) {
+  state.timeOfDay = ((next % 24) + 24) % 24;
+  ui.timeSlider.value = state.timeOfDay;
   syncTimeUI();
   render();
-});
+}
+
+ui.lunarSlider.addEventListener('input', (e) => setLunarDay(parseFloat(e.target.value)));
+ui.timeSlider.addEventListener('input',  (e) => setTimeOfDay(parseFloat(e.target.value)));
 
 function formatHHMM(hours) {
   const h = Math.floor(hours);
@@ -102,6 +106,73 @@ window.addEventListener('resize', () => {
     render();
   });
 });
+
+// Drag the Moon or the observer directly on the orbital canvas. Hit-test in
+// canvas-internal pixels (CSS pixels are scaled to that via getBoundingClientRect).
+const HIT_SLACK_PX = 8;
+let drag = null;
+
+function canvasPoint(e) {
+  const rect = orbCanvas.getBoundingClientRect();
+  const sx = orbCanvas.width  / rect.width;
+  const sy = orbCanvas.height / rect.height;
+  return { x: (e.clientX - rect.left) * sx, y: (e.clientY - rect.top) * sy };
+}
+
+function pickTarget(p) {
+  const g = orbitalGeometry(orbCanvas, state);
+  const dm = Math.hypot(p.x - g.mX, p.y - g.mY);
+  const dObs = Math.hypot(p.x - g.oX, p.y - g.oY);
+  const moonHit = dm <= g.moonR + HIT_SLACK_PX;
+  const obsHit  = dObs <= HIT_SLACK_PX * 2;
+  // If both regions overlap (small canvas), prefer whichever is closer in
+  // proportion to its hit radius.
+  if (moonHit && obsHit) {
+    return (dm / (g.moonR + HIT_SLACK_PX)) < (dObs / (HIT_SLACK_PX * 2)) ? 'moon' : 'observer';
+  }
+  if (moonHit) return 'moon';
+  if (obsHit)  return 'observer';
+  return null;
+}
+
+function applyDrag(target, p) {
+  const g = orbitalGeometry(orbCanvas, state);
+  const angle = Math.atan2(g.cy - p.y, p.x - g.cx); // CCW from +x, [-π, π]
+  const turns = ((angle / (Math.PI * 2)) % 1 + 1) % 1;
+  if (target === 'moon') {
+    setLunarDay(turns * LUNAR_CYCLE_DAYS);
+  } else {
+    setTimeOfDay(12 + turns * 24);
+  }
+}
+
+orbCanvas.addEventListener('pointerdown', (e) => {
+  const p = canvasPoint(e);
+  const target = pickTarget(p);
+  if (!target) return;
+  drag = target;
+  orbCanvas.setPointerCapture(e.pointerId);
+  orbCanvas.style.cursor = 'grabbing';
+  applyDrag(drag, p);
+  e.preventDefault();
+});
+
+orbCanvas.addEventListener('pointermove', (e) => {
+  if (drag) {
+    applyDrag(drag, canvasPoint(e));
+    return;
+  }
+  orbCanvas.style.cursor = pickTarget(canvasPoint(e)) ? 'grab' : 'default';
+});
+
+function endDrag(e) {
+  if (drag == null) return;
+  drag = null;
+  if (orbCanvas.hasPointerCapture(e.pointerId)) orbCanvas.releasePointerCapture(e.pointerId);
+  orbCanvas.style.cursor = pickTarget(canvasPoint(e)) ? 'grab' : 'default';
+}
+orbCanvas.addEventListener('pointerup', endDrag);
+orbCanvas.addEventListener('pointercancel', endDrag);
 
 syncLunarUI();
 syncTimeUI();
