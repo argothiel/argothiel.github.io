@@ -18,35 +18,33 @@
 
 <div class="main-grid">
 
-  <!-- Top-down orbital view, with a thin observer's-horizon strip on the right -->
+  <!-- Top-down orbital view, with a thin observer's-horizon strip on the right
+       and a status row beneath the orbital canvas. The horizon strip spans the
+       full panel height. -->
   <div class="panel orbital-panel">
-    <div class="orbital-row">
-      <div class="canvas-cell">
-        <canvas id="orbitalCanvas"
-                aria-label="Top-down diagram of the Sun, Earth, and Moon, showing the Moon's current orbital position and the observer on Earth's surface."></canvas>
+    <div class="canvas-cell orbital-cell">
+      <canvas id="orbitalCanvas"
+              aria-label="Top-down diagram of the Sun, Earth, and Moon, showing the Moon's current orbital position and the observer on Earth's surface."></canvas>
+    </div>
+    <div class="canvas-cell horizon-cell">
+      <canvas id="horizonCanvas"
+              aria-label="Observer's horizon strip showing the Moon at its current altitude with the corresponding lunar phase."></canvas>
+    </div>
+    <div class="info-panel" aria-live="polite">
+      <div class="info-cell">
+        <div class="info-cell-label">Lunar Day</div>
+        <div class="info-cell-value" id="lunarDayVal">0.0</div>
       </div>
-      <div class="canvas-cell">
-        <canvas id="horizonCanvas"
-                aria-label="Observer's horizon strip showing the Moon at its current altitude with the corresponding lunar phase."></canvas>
+      <div class="info-cell">
+        <div class="info-cell-label">Time (UTC)</div>
+        <div class="info-cell-value" id="timeOfDayVal">12:00</div>
       </div>
+      <div class="info-cell">
+        <div class="info-cell-label">Phase Name</div>
+        <div class="info-cell-value highlight" id="phaseName">New Moon</div>
+      </div>
+      <button id="resetButton" class="info-cell info-action" type="button" aria-label="Reset to default lunar day and time">Reset</button>
     </div>
-  </div>
-
-  <!-- Info bar -->
-  <div class="info-panel" aria-live="polite">
-    <div class="info-cell">
-      <div class="info-cell-label">Lunar Day</div>
-      <div class="info-cell-value" id="lunarDayVal">0.0</div>
-    </div>
-    <div class="info-cell">
-      <div class="info-cell-label">Time (UTC)</div>
-      <div class="info-cell-value" id="timeOfDayVal">12:00</div>
-    </div>
-    <div class="info-cell">
-      <div class="info-cell-label">Phase Name</div>
-      <div class="info-cell-value highlight" id="phaseName">New Moon</div>
-    </div>
-    <button id="resetButton" class="info-cell info-action" type="button" aria-label="Reset to default lunar day and time">Reset</button>
   </div>
 
 </div>

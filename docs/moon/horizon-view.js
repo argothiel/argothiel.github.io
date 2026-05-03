@@ -19,7 +19,10 @@ const SKY = {
 };
 
 const LAYOUT = {
-  horizonFraction:   0.85,  // share of canvas height that is sky
+  // Default share of canvas height that is sky. drawHorizon accepts an override
+  // so the caller can pin the horizon line to a layout landmark (the info-bar
+  // top edge) regardless of how the strip is sized vs the rest of the panel.
+  defaultHorizonFraction: 0.85,
   altitudeScale:     0.85,  // how high alt=+1 reaches in the sky region
   moonRadius:        0.40,  // of min(W, H) — scales for narrow strip
   moonGlowInner:     0.8,   // multipliers on moon radius
@@ -38,14 +41,14 @@ const COLOR = {
   moonRim:      'rgba(150,160,200,0.3)',
 };
 
-export function drawHorizon(ctx, state) {
+export function drawHorizon(ctx, state, horizonFraction = LAYOUT.defaultHorizonFraction) {
   const W = ctx.canvas.width;
   const H = ctx.canvas.height;
   ctx.clearRect(0, 0, W, H);
 
   const sunAlt   = sunAltitude(state);
   const moonAlt  = moonAltitude(state);
-  const horizonY = H * LAYOUT.horizonFraction;
+  const horizonY = H * horizonFraction;
   const skyHeight = horizonY;
 
   drawSky(ctx, W, skyHeight, sunAlt);

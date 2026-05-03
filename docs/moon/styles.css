@@ -116,9 +116,16 @@ canvas {
   margin: 0 auto;
   width: 100%;
   aspect-ratio: 1 / 1;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12%;
+  grid-template-rows: minmax(0, 1fr) auto;
+  column-gap: 2%;
+  row-gap: 0;
 }
+
+.orbital-cell { grid-column: 1; grid-row: 1; }
+.horizon-cell { grid-column: 2; grid-row: 1 / span 2; }
+.orbital-panel .info-panel { grid-column: 1; grid-row: 2; }
 
 #resetButton.info-action {
   background: var(--panel);
@@ -140,15 +147,6 @@ canvas {
   color: var(--gold);
   background: rgba(var(--gold-rgb), 0.06);
   outline: none;
-}
-
-.orbital-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 12%;
-  gap: 2%;
-  align-items: stretch;
-  flex: 1;
-  min-height: 0;
 }
 
 .canvas-cell {
@@ -178,7 +176,7 @@ canvas {
   overflow: hidden;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .info-panel {
     grid-template-columns: 1fr 1fr;
   }
@@ -186,10 +184,11 @@ canvas {
 
 .info-cell {
   background: var(--panel);
-  padding: 14px 16px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  min-width: 0;
 }
 
 .info-cell-label {
@@ -198,12 +197,18 @@ canvas {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info-cell-value {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info-cell-value.highlight {

@@ -70,9 +70,19 @@ function resizeCanvases() {
   }
 }
 
+// Pin the horizon line on the strip to the info-bar's top edge so the strip's
+// "ground" continues seamlessly into the info-bar and its dark sibling cell.
+function computeHorizonFraction() {
+  const strip = horizonCanvas.getBoundingClientRect();
+  const info  = document.querySelector('.info-panel').getBoundingClientRect();
+  if (strip.height <= 0) return undefined;
+  const f = (info.top - strip.top) / strip.height;
+  return Math.min(1, Math.max(0, f));
+}
+
 function render() {
   drawOrbital(orbCtx, state);
-  drawHorizon(horizonCtx, state);
+  drawHorizon(horizonCtx, state, computeHorizonFraction());
   updateInfo();
 }
 
