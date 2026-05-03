@@ -8,7 +8,7 @@ import {
   moonPhaseAngle,
   sunAltitude,
 } from './physics.js';
-import { GOLD_RGB, LEFT_HALF, RIGHT_HALF, drawStars, lerpRGB } from './render-utils.js';
+import { GOLD_RGB, drawStars, lerpRGB } from './render-utils.js';
 
 // Sky palette stops (top, mid, bottom) for night, twilight, day.
 // Twilight keeps the zenith cool and concentrates warm light at the horizon.
@@ -137,64 +137,38 @@ function drawMoonGlow(ctx, x, y, r, illum) {
 }
 
 // ── Mini Moon disc with the current phase ──────────────────────────────────
-// Three layers, clipped to the disc:
-//   1. dark background
-//   2. lit semicircle (right when waxing, left when waning)
-//   3. terminator ellipse — width = |cos α|·r where α is the phase angle.
-//      Crescent (illum < 0.5): ellipse on the LIT side, painted dark
-//                              → carves a crescent out of the lit half.
-//      Gibbous  (illum > 0.5): ellipse on the DARK side, painted lit
-//                              → extends the lit region past the centre.
-//      At the limits: illum = 1 → termX = r → ellipse covers the dark
-//      hemisphere completely (full moon); illum = 0 → ellipse covers the
-//      lit hemisphere completely (new moon).
+// Lit region drawn as a single closed path: the lit-side disc arc joined to
+// a terminator half-ellipse of width termX = |cos α|·r (since
+// illum = (1 − cos α)/2). Doing this in one path — rather than a lit
+// semicircle + a separate terminator ellipse butted at the diameter —
+// avoids the AA seam visible on high-DPI displays where the two paths'
+// anti-aliased edges left a 1-px column of the dark base showing through.
 
 function drawMoonPhase(ctx, mx, my, r, illum, waxing) {
+  // Dark disc shows through wherever the lit path doesn't cover.
   ctx.beginPath();
   ctx.arc(mx, my, r, 0, Math.PI * 2);
   ctx.fillStyle = COLOR.moonDark;
   ctx.fill();
 
-  ctx.save();
+  const termX = Math.abs(1 - 2 * illum) * r;
+  const crescent = illum < 0.5;
+  // The terminator half-ellipse bulges right for waxing crescent and
+  // waning gibbous; left otherwise.
+  const ellipseRight = crescent === waxing;
+
   ctx.beginPath();
-  ctx.arc(mx, my, r, 0, Math.PI * 2);
-  ctx.clip();
-
-  drawLitHemisphere(ctx, mx, my, r, waxing);
-  drawTerminator(ctx, mx, my, r, illum, waxing);
-
-  ctx.restore();
+  // Lit-side disc edge, top → bottom: via +x (waxing) or via −x (waning).
+  ctx.arc(mx, my, r, -Math.PI / 2, Math.PI / 2, !waxing);
+  // Terminator, bottom → top, via the chosen side.
+  ctx.ellipse(mx, my, termX, r, 0, Math.PI / 2, -Math.PI / 2, ellipseRight);
+  ctx.closePath();
+  ctx.fillStyle = COLOR.moonLit;
+  ctx.fill();
 
   ctx.beginPath();
   ctx.arc(mx, my, r, 0, Math.PI * 2);
   ctx.strokeStyle = COLOR.moonRim;
   ctx.lineWidth = 1;
   ctx.stroke();
-}
-
-function drawLitHemisphere(ctx, mx, my, r, waxing) {
-  const [start, end] = waxing ? RIGHT_HALF : LEFT_HALF;
-  ctx.beginPath();
-  ctx.arc(mx, my, r, start, end);
-  ctx.closePath();
-  ctx.fillStyle = COLOR.moonLit;
-  ctx.fill();
-}
-
-function drawTerminator(ctx, mx, my, r, illum, waxing) {
-  // |cos α| = |1 − 2·illum|, since illum = (1 − cos α) / 2.
-  const termX = Math.abs(1 - 2 * illum) * r;
-  const crescent = illum < 0.5;
-
-  // The lit hemisphere is on the right when waxing, left when waning.
-  // Crescent → paint a dark ellipse over the lit side (carve a sliver).
-  // Gibbous  → paint a lit  ellipse over the dark side (extend lit area).
-  const ellipseOnRight = crescent ? waxing : !waxing;
-  const [start, end] = ellipseOnRight ? RIGHT_HALF : LEFT_HALF;
-
-  ctx.beginPath();
-  ctx.ellipse(mx, my, termX, r, 0, start, end, false);
-  ctx.closePath();
-  ctx.fillStyle = crescent ? COLOR.moonDark : COLOR.moonLit;
-  ctx.fill();
 }
