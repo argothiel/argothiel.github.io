@@ -121,6 +121,7 @@ canvas {
   grid-template-rows: minmax(0, 1fr) auto;
   column-gap: 2%;
   row-gap: 0;
+  container-type: inline-size;
 }
 
 .orbital-cell { grid-column: 1; grid-row: 1; }
@@ -132,7 +133,7 @@ canvas {
   border: none;
   color: var(--text-dim);
   font-family: 'Syne Mono', monospace;
-  font-size: 0.7rem;
+  font-size: 1.6cqw;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   cursor: pointer;
@@ -176,24 +177,18 @@ canvas {
   overflow: hidden;
 }
 
-@media (max-width: 600px) {
-  .info-panel {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .info-cell {
   background: var(--panel);
-  padding: 10px 12px;
+  padding: clamp(6px, 2cqw, 10px) clamp(8px, 2.5cqw, 12px);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: clamp(2px, 0.8cqw, 4px);
   min-width: 0;
 }
 
 .info-cell-label {
   font-family: 'Syne Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 1.4cqw;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -203,7 +198,7 @@ canvas {
 }
 
 .info-cell-value {
-  font-size: 0.9rem;
+  font-size: 2.1cqw;
   font-weight: 700;
   line-height: 1.2;
   min-height: 2.4em;
