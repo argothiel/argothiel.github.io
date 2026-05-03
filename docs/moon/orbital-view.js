@@ -78,7 +78,7 @@ export function drawOrbital(ctx, state) {
   const W = ctx.canvas.width;
   const H = ctx.canvas.height;
   const g = orbitalGeometry(ctx.canvas, state);
-  const { cx, cy, earthR, moonOrbitR, moonR, sunX, sunY, sunR, mX, mY } = g;
+  const { cx, cy, earthR, moonOrbitR, moonR, sunX, sunY, sunR, mX, mY, oX, oY } = g;
 
   ctx.fillStyle = COLOR.bg;
   ctx.fillRect(0, 0, W, H);
@@ -89,7 +89,7 @@ export function drawOrbital(ctx, state) {
   drawDirectionLine(ctx, cx, cy, mX,  mY,  COLOR.moonRay);
   drawSun(ctx, sunX, sunY, sunR);
   drawEarth(ctx, cx, cy, earthR);
-  drawObserver(ctx, cx, cy, earthR, state);
+  drawObserver(ctx, oX, oY);
   drawMoon(ctx, mX, mY, moonR);
   drawLabels(ctx, W, { cx, cy, sunX, sunY, sunR, mX, mY, earthR, moonR });
   drawPhaseArc(ctx, cx, cy, moonOrbitR * LAYOUT.phaseArcRel, moonPhaseAngle(state));
@@ -171,14 +171,11 @@ function drawEarth(ctx, cx, cy, r) {
   ctx.stroke();
 }
 
-function drawObserver(ctx, cx, cy, earthR, { timeOfDay }) {
-  // Observer rides Earth's equatorial circle; noon (12 h) puts them on the
-  // sunlit side (+x), midnight (0 h) on the night side (−x). Tilt is shown
-  // by the axis line, not by displacing the observer's longitude.
-  const angle = ((timeOfDay - 12) / 24) * Math.PI * 2;
-  const x = cx + Math.cos(angle) * earthR;
-  const y = cy - Math.sin(angle) * earthR;
-
+// Observer rides Earth's equatorial circle; noon (12 h) puts them on the
+// sunlit side (+x), midnight (0 h) on the night side (−x). Tilt is shown
+// by the axis line, not by displacing the observer's longitude. Position
+// is computed in orbitalGeometry so the input layer can hit-test it.
+function drawObserver(ctx, x, y) {
   ctx.beginPath();
   ctx.arc(x, y, LAYOUT.observerDot, 0, Math.PI * 2);
   ctx.fillStyle = COLOR.observer;

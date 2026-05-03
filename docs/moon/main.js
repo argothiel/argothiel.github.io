@@ -7,10 +7,8 @@ import { drawOrbital, orbitalGeometry, drawDragHints } from './orbital-view.js';
 import { drawHorizon } from './horizon-view.js';
 import { LUNAR_CYCLE_DAYS, phaseName } from './physics.js';
 
-const state = {
-  lunarDay:  0,
-  timeOfDay: 12,
-};
+const DEFAULT_STATE = { lunarDay: 0, timeOfDay: 12 };
+const state = { ...DEFAULT_STATE };
 
 const orbCanvas     = document.getElementById('orbitalCanvas');
 const horizonCanvas = document.getElementById('horizonCanvas');
@@ -24,8 +22,6 @@ const ui = {
   resetButton:  document.getElementById('resetButton'),
   playButton:   document.getElementById('playButton'),
 };
-
-const DEFAULT_STATE = { lunarDay: 0, timeOfDay: 12 };
 
 ui.resetButton.addEventListener('click', () => {
   setPlaying(false);
@@ -151,6 +147,7 @@ orbCanvas.addEventListener('pointerdown', (e) => {
   const p = canvasPoint(e);
   const target = pickTarget(p);
   if (!target) return;
+  cancelPulse();
   if (playing) setPlaying(false);
   drag = target;
   orbCanvas.setPointerCapture(e.pointerId);
@@ -203,7 +200,6 @@ function cancelPulse() {
   pulseActive = false;
   render();
 }
-orbCanvas.addEventListener('pointerdown', cancelPulse, { once: true });
 
 requestAnimationFrame(pulseFrame);
 
