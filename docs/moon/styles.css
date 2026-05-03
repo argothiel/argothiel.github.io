@@ -197,6 +197,12 @@ canvas {
   flex-direction: column;
   gap: clamp(2px, 0.8cqw, 4px);
   min-width: 0;
+  position: relative;
+}
+
+.time-cell {
+  /* Reserve space on the right for the absolutely-positioned play button. */
+  padding-right: clamp(36px, 8cqw, 56px);
 }
 
 .info-cell-label {
@@ -221,4 +227,44 @@ canvas {
 .info-cell-value.highlight {
   color: var(--gold);
 }
+
+.play-button {
+  /* Spans the full cell height on the right, vertically centred across both
+     the label and the value rows. Explicit font-size ties the em-based
+     dimensions to the panel's container-query scale. */
+  position: absolute;
+  right: clamp(8px, 2.5cqw, 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2.1cqw;
+  background: transparent;
+  border: 1px solid rgba(var(--gold-rgb), 0.45);
+  border-radius: 50%;
+  width: 2.8em;
+  height: 2.8em;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.play-button:hover,
+.play-button:focus-visible {
+  background: rgba(var(--gold-rgb), 0.14);
+  border-color: rgba(var(--gold-rgb), 0.85);
+  outline: none;
+}
+
+.play-button svg {
+  width: 60%;
+  height: 60%;
+  fill: currentColor;
+}
+
+.play-button .icon-pause { display: none; }
+.play-button.playing .icon-play { display: none; }
+.play-button.playing .icon-pause { display: block; }
 

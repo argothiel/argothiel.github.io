@@ -22,11 +22,13 @@ const ui = {
   timeOfDayVal: document.getElementById('timeOfDayVal'),
   phaseName:    document.getElementById('phaseName'),
   resetButton:  document.getElementById('resetButton'),
+  playButton:   document.getElementById('playButton'),
 };
 
 const DEFAULT_STATE = { lunarDay: 0, timeOfDay: 12 };
 
 ui.resetButton.addEventListener('click', () => {
+  setPlaying(false);
   state.lunarDay  = DEFAULT_STATE.lunarDay;
   state.timeOfDay = DEFAULT_STATE.timeOfDay;
   render();
@@ -149,6 +151,7 @@ orbCanvas.addEventListener('pointerdown', (e) => {
   const p = canvasPoint(e);
   const target = pickTarget(p);
   if (!target) return;
+  if (playing) setPlaying(false);
   drag = target;
   orbCanvas.setPointerCapture(e.pointerId);
   orbCanvas.style.cursor = 'grabbing';
@@ -203,3 +206,36 @@ function cancelPulse() {
 orbCanvas.addEventListener('pointerdown', cancelPulse, { once: true });
 
 requestAnimationFrame(pulseFrame);
+
+// Play button: animate solar time forward until paused. Lunar day advances
+// continuously at the physical rate (1 unit per 24 h of solar time), so the
+// Moon drifts smoothly around its orbit as the days cycle.
+const PLAY_HOURS_PER_SEC = 12;
+let playing = false;
+let lastPlayMs = 0;
+
+function playFrame(now) {
+  if (!playing) return;
+  // Clamp dt so a backgrounded tab doesn't jump the simulation by hours.
+  const dt = Math.min((now - lastPlayMs) / 1000, 0.1);
+  lastPlayMs = now;
+  const dHours = dt * PLAY_HOURS_PER_SEC;
+  state.timeOfDay = ((state.timeOfDay + dHours) % 24 + 24) % 24;
+  state.lunarDay  = (state.lunarDay + dHours / 24) % LUNAR_CYCLE_DAYS;
+  render();
+  requestAnimationFrame(playFrame);
+}
+
+function setPlaying(next) {
+  if (playing === next) return;
+  playing = next;
+  ui.playButton.classList.toggle('playing', playing);
+  ui.playButton.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  if (playing) {
+    cancelPulse();
+    lastPlayMs = performance.now();
+    requestAnimationFrame(playFrame);
+  }
+}
+
+ui.playButton.addEventListener('click', () => setPlaying(!playing));
