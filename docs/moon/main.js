@@ -3,7 +3,7 @@
 // physics functions are pure functions of state. State is mutated by
 // dragging the Moon or observer directly on the orbital canvas.
 
-import { drawOrbital, orbitalGeometry } from './orbital-view.js';
+import { drawOrbital, orbitalGeometry, drawDragHints } from './orbital-view.js';
 import { drawHorizon } from './horizon-view.js';
 import { LUNAR_CYCLE_DAYS, phaseName } from './physics.js';
 
@@ -51,6 +51,11 @@ function updateInfo() {
   ui.lunarDayVal.textContent  = state.lunarDay.toFixed(1);
   ui.timeOfDayVal.textContent = formatHHMM(state.timeOfDay);
   ui.phaseName.textContent    = phaseName(state);
+  // Disable the reset button when there's nothing to reset, so it stops
+  // shouting for attention until the user has actually moved something.
+  ui.resetButton.disabled =
+    state.lunarDay  === DEFAULT_STATE.lunarDay &&
+    state.timeOfDay === DEFAULT_STATE.timeOfDay;
 }
 
 function formatHHMM(hours) {
@@ -176,3 +181,25 @@ render();
 if (document.fonts?.ready) {
   document.fonts.ready.then(render);
 }
+
+// Pulse both draggable elements (Moon + observer) to hint they're interactive.
+// Loops until the first interaction so a user who's still reading doesn't miss it.
+let pulseStart = null;
+let pulseActive = true;
+
+function pulseFrame(now) {
+  if (!pulseActive) return;
+  if (pulseStart == null) pulseStart = now;
+  render();
+  drawDragHints(orbCtx, state, now - pulseStart);
+  requestAnimationFrame(pulseFrame);
+}
+
+function cancelPulse() {
+  if (!pulseActive) return;
+  pulseActive = false;
+  render();
+}
+orbCanvas.addEventListener('pointerdown', cancelPulse, { once: true });
+
+requestAnimationFrame(pulseFrame);

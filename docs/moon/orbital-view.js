@@ -241,6 +241,43 @@ function drawLabel(ctx, text, x, y, color) {
   ctx.fillText(text, x, y);
 }
 
+// Expanding gold rings over the draggable elements (Moon + observer) —
+// a load-time hint. Loops indefinitely; the caller stops calling on first
+// interaction. Both elements pulse in sync so the user reads them as a pair.
+const PULSE_RING_MS = 1500;
+const PULSE_STAGGER_MS = 750;
+const PULSE_RING_COUNT = 2;
+
+export function drawDragHints(ctx, state, elapsedMs) {
+  const g = orbitalGeometry(ctx.canvas, state);
+  ctx.save();
+  for (let i = 0; i < PULSE_RING_COUNT; i++) {
+    // Phase each ring within the same cycle; modulo gives a seamless repeat.
+    const t = ((elapsedMs - i * PULSE_STAGGER_MS) % PULSE_RING_MS + PULSE_RING_MS) % PULSE_RING_MS;
+    const u = t / PULSE_RING_MS;
+    const alpha = (1 - u) * 0.55;
+    const stroke = `rgba(${GOLD_RGB},${alpha})`;
+
+    // Moon pulse: expand well past the Moon's disc.
+    drawPulseRing(ctx, g.mX, g.mY, g.moonR * (1.15 + u * 3.6), stroke);
+
+    // Observer pulse: cap near Earth's disc so it doesn't sprawl into the
+    // orbital ring or compete with the Moon's pulse for visual space.
+    const obsBase = LAYOUT.observerHaloRadius;
+    const obsMax  = g.earthR * 1.6;
+    drawPulseRing(ctx, g.oX, g.oY, obsBase + u * (obsMax - obsBase), stroke);
+  }
+  ctx.restore();
+}
+
+function drawPulseRing(ctx, x, y, r, stroke) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
 function drawPhaseArc(ctx, cx, cy, r, angle) {
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, -angle, true);

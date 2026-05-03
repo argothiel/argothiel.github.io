@@ -128,28 +128,6 @@ canvas {
 .horizon-cell { grid-column: 2; grid-row: 1 / span 2; }
 .orbital-panel .info-panel { grid-column: 1; grid-row: 2; }
 
-#resetButton.info-action {
-  background: var(--panel);
-  border: none;
-  color: var(--text-dim);
-  font-family: 'Syne Mono', monospace;
-  font-size: 1.6cqw;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#resetButton.info-action:hover,
-#resetButton.info-action:focus-visible {
-  color: var(--gold);
-  background: rgba(var(--gold-rgb), 0.06);
-  outline: none;
-}
-
 .canvas-cell {
   position: relative;
   min-width: 0;
@@ -175,6 +153,41 @@ canvas {
   border: 1px solid var(--border);
   border-radius: 4px;
   overflow: hidden;
+}
+
+/* Sits in the info grid like a 4th cell, but reads as a button: inset border,
+   gold tint, and a hover/focus state that lifts the whole chip. */
+#resetButton.info-action {
+  background: rgba(var(--gold-rgb), 0.05);
+  border: none;
+  box-shadow: inset 0 0 0 1px rgba(var(--gold-rgb), 0.35);
+  color: var(--gold);
+  font-family: 'Syne Mono', monospace;
+  font-size: 1.6cqw;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 clamp(10px, 3cqw, 16px);
+}
+
+#resetButton.info-action:hover,
+#resetButton.info-action:focus-visible {
+  background: rgba(var(--gold-rgb), 0.14);
+  box-shadow: inset 0 0 0 1px rgba(var(--gold-rgb), 0.7);
+  outline: none;
+}
+
+/* Already at the reset state — drop the button affordance so it blends in
+   with the info cells instead of competing for attention. */
+#resetButton.info-action:disabled {
+  background: var(--panel);
+  box-shadow: none;
+  color: var(--text-dim);
+  cursor: pointer;
 }
 
 .info-cell {
