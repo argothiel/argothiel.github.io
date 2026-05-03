@@ -205,10 +205,9 @@ canvas {
 .info-cell-value {
   font-size: 0.9rem;
   font-weight: 700;
+  line-height: 1.2;
+  min-height: 2.4em;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .info-cell-value.highlight {
