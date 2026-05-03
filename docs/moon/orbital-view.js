@@ -241,8 +241,14 @@ function drawLabel(ctx, text, x, y, color) {
 // Expanding gold rings over the draggable elements (Moon + observer) —
 // a load-time hint. Loops indefinitely; the caller stops calling on first
 // interaction. Both elements pulse in sync so the user reads them as a pair.
-const PULSE_RING_MS = 1500;
-const PULSE_STAGGER_MS = 750;
+// Cadence / alpha / stroke are read from --pulse-* CSS custom properties so
+// the play-button's CSS animation in styles.css shares the same numbers.
+const ROOT_STYLE = getComputedStyle(document.documentElement);
+const cssNumber = (name) => parseFloat(ROOT_STYLE.getPropertyValue(name));
+const PULSE_RING_MS    = cssNumber('--pulse-ms');
+const PULSE_STAGGER_MS = cssNumber('--pulse-stagger-ms');
+const PULSE_ALPHA      = cssNumber('--pulse-alpha');
+const PULSE_STROKE_PX  = cssNumber('--pulse-stroke-px');
 const PULSE_RING_COUNT = 2;
 
 export function drawDragHints(ctx, state, elapsedMs) {
@@ -252,7 +258,7 @@ export function drawDragHints(ctx, state, elapsedMs) {
     // Phase each ring within the same cycle; modulo gives a seamless repeat.
     const t = ((elapsedMs - i * PULSE_STAGGER_MS) % PULSE_RING_MS + PULSE_RING_MS) % PULSE_RING_MS;
     const u = t / PULSE_RING_MS;
-    const alpha = (1 - u) * 0.55;
+    const alpha = (1 - u) * PULSE_ALPHA;
     const stroke = `rgba(${GOLD_RGB},${alpha})`;
 
     // Moon pulse: expand well past the Moon's disc.
@@ -271,7 +277,7 @@ function drawPulseRing(ctx, x, y, r, stroke) {
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.strokeStyle = stroke;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = PULSE_STROKE_PX;
   ctx.stroke();
 }
 

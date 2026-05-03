@@ -9,6 +9,14 @@
 
   --text: #ccd6f6;
   --text-dim: #4a5a80;
+
+  /* Pulse hint cadence — single source of truth shared between the canvas
+     drag hints (read by orbital-view.js via getComputedStyle) and the
+     play-button's CSS animation. */
+  --pulse-ms: 1500ms;
+  --pulse-stagger-ms: 750ms;
+  --pulse-alpha: 0.55;
+  --pulse-stroke-px: 1.5px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -262,4 +270,28 @@ canvas {
 .play-button .icon-pause { display: none; }
 .play-button.playing .icon-play { display: none; }
 .play-button.playing .icon-pause { display: block; }
+
+/* Looping gold pulses, twin to the canvas drag hints. The two rings stagger
+   by half the cycle. Removed when JS strips .hint-active on first interaction.
+   Cadence / alpha / stroke come from the --pulse-* custom properties above. */
+.play-button.hint-active::before,
+.play-button.hint-active::after {
+  content: '';
+  position: absolute;
+  /* Sit just outside the button's own border so the ring at scale(1) reads
+     as a separate stroke rather than thickening the chip outline. */
+  inset: -3px;
+  border-radius: 50%;
+  border: var(--pulse-stroke-px) solid rgb(var(--gold-rgb));
+  pointer-events: none;
+  animation: play-pulse var(--pulse-ms) linear infinite;
+}
+.play-button.hint-active::after {
+  animation-delay: calc(var(--pulse-stagger-ms) * -1);
+}
+
+@keyframes play-pulse {
+  from { transform: scale(1);   opacity: var(--pulse-alpha); }
+  to   { transform: scale(2.2); opacity: 0;                  }
+}
 

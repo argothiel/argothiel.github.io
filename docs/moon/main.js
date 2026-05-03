@@ -182,10 +182,13 @@ if (document.fonts?.ready) {
   document.fonts.ready.then(render);
 }
 
-// Pulse both draggable elements (Moon + observer) to hint they're interactive.
-// Loops until the first interaction so a user who's still reading doesn't miss it.
+// Pulse the draggable elements (Moon + observer) and the play button to hint
+// they're interactive. Loops until the first interaction so a user who's still
+// reading doesn't miss it. The play button's pulse is pure CSS, gated on the
+// .hint-active class.
 let pulseStart = null;
 let pulseActive = true;
+ui.playButton.classList.add('hint-active');
 
 function pulseFrame(now) {
   if (!pulseActive) return;
@@ -198,6 +201,7 @@ function pulseFrame(now) {
 function cancelPulse() {
   if (!pulseActive) return;
   pulseActive = false;
+  ui.playButton.classList.remove('hint-active');
   render();
 }
 
