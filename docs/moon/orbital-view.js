@@ -23,7 +23,6 @@ const COLOR = {
   moonRay:      'rgba(200,205,216,0.2)',
   observer:     `rgb(${GOLD_RGB})`,
   observerHalo: `rgba(${GOLD_RGB},0.5)`,
-  phaseArc:     `rgba(${GOLD_RGB},0.4)`,
   labelSun:     `rgba(${GOLD_RGB},0.7)`,
   labelEarth:   'rgba(80,160,255,0.7)',
   labelMoon:    'rgba(200,205,216,0.7)',
@@ -45,7 +44,6 @@ const LAYOUT = {
   labelOffsetEx: 0.05,  // earth label extra offset
   labelMoonGap:  0.04,
   labelDescent:  0.015,
-  phaseArcRel:   0.18,  // phase arc radius / moon orbit radius
 };
 
 // Geometry derived from canvas size and state — exported so the input layer
@@ -92,7 +90,6 @@ export function drawOrbital(ctx, state) {
   drawObserver(ctx, oX, oY);
   drawMoon(ctx, mX, mY, moonR);
   drawLabels(ctx, W, { cx, cy, sunX, sunY, sunR, mX, mY, earthR, moonR });
-  drawPhaseArc(ctx, cx, cy, moonOrbitR * LAYOUT.phaseArcRel, moonPhaseAngle(state));
 }
 
 function drawOrbit(ctx, cx, cy, r) {
@@ -281,10 +278,3 @@ function drawPulseRing(ctx, x, y, r, stroke) {
   ctx.stroke();
 }
 
-function drawPhaseArc(ctx, cx, cy, r, angle) {
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, -angle, true);
-  ctx.strokeStyle = COLOR.phaseArc;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-}
