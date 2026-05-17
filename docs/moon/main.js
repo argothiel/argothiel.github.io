@@ -7,7 +7,7 @@ import { drawOrbital, orbitalGeometry, drawDragHints } from './orbital-view.js';
 import { drawHorizon } from './horizon-view.js';
 import { LUNAR_CYCLE_DAYS, phaseName } from './physics.js';
 
-const DEFAULT_STATE = { lunarDay: 0, timeOfDay: 12 };
+const DEFAULT_STATE = { lunarDay: 0, timeOfDay: 6 };
 const state = { ...DEFAULT_STATE };
 
 const orbCanvas     = document.getElementById('orbitalCanvas');
