@@ -34,9 +34,9 @@ const LAYOUT = {
   sunOffsetRight: 2.45, // Sun centre this fraction of canvas width past the right edge
   sunRadius:      2.50,
   sunGlow:        1.25,  // glow radius / sun radius
-  earthRadius:   0.055,
+  earthRadius:   0.085,
   moonOrbit:     0.26,
-  moonSize:      0.42,  // moon radius / earth radius
+  moonSize:      0.272, // moon radius / earth radius
   observerDot:        3,  // px
   observerHaloRadius: 5,  // px (ring around the observer dot)
   starCount:     80,
